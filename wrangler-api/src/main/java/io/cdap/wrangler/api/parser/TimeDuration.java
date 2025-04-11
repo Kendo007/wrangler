@@ -10,44 +10,46 @@ public class TimeDuration implements Token {
      * The {@code TimeDuration} object that represents the value held by the token.
      */
     private final String raw;
-    private double value = 0L;
+    private double value;
+
+    public TimeDuration(String raw) {
+        if (raw.startsWith("-")) {
+            throw new IllegalArgumentException("Negative time duration: " + raw);
+        }
+
+        this.value = parseTime(raw);
+
+        if (value <= 0) {
+            throw new IllegalArgumentException("Invalid time: " + raw);
+        }
+
+        this.raw = raw;
+    }
 
     /**
      * Parses the string and returns the value in milliseconds.
      *
      * @param raw the string to parse
      */
-    private double parseBytes(String raw) {
+    private double parseTime(String raw) {
         int index = 0;
-
-        while (index < raw.length() && Character.isDigit(raw.charAt(index)))
+        while (index < raw.length() && (Character.isDigit(raw.charAt(index)) || raw.charAt(index) == '.')) {
             index++;
+        }
 
         String unitPart = raw.substring(index).toLowerCase();
-        double number = Double.parseDouble(raw.substring(0, index));   // parse the number part
+        double number = Double.parseDouble(raw.substring(0, index));
 
         switch (unitPart) {
             case "s":
             case "sec":
             case "seconds":
-                value = (number * 1000);
-                break;
+                return number * 1000;
             case "ms":
-                value = number;
-                break;
-        };
-
-        return value;
-    }
-
-    public TimeDuration(String raw) {
-        this.value = parseBytes(raw);
-        this.raw = raw;
-    }
-
-    @Override
-    public Object value() {
-        return raw;
+                return number;
+            default:
+                throw new IllegalArgumentException("Unknown time unit: " + unitPart);
+        }
     }
 
     /**
@@ -55,6 +57,11 @@ public class TimeDuration implements Token {
      */
     public double getMilliSeconds() {
         return value;
+    }
+
+    @Override
+    public Object value() {
+        return raw;
     }
 
     @Override
@@ -67,6 +74,6 @@ public class TimeDuration implements Token {
         JsonObject object = new JsonObject();
         object.addProperty("type", TokenType.TIME_DURATION.name());
         object.addProperty("value", raw);
-        return null;
+        return object;
     }
 }

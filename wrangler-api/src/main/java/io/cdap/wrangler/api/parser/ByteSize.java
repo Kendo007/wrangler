@@ -10,7 +10,21 @@ public class ByteSize implements Token {
      * The {@code ByteSize} object that represents the value held by the token.
      */
     private final String raw;
-    private long value = 0L;
+    private long value;
+
+    public ByteSize(String raw) {
+        if (raw.startsWith("-")) {
+            throw new IllegalArgumentException("Negative Size: " + raw);
+        }
+
+        this.value = parseBytes(raw);
+
+        if (value <= 0L) {
+            throw new IllegalArgumentException("Invalid Size: " + raw);
+        }
+
+        this.raw = raw;
+    }
 
     /**
      * Parses the string and returns the value in bytes.
@@ -20,11 +34,17 @@ public class ByteSize implements Token {
     private long parseBytes(String raw) {
         int index = 0;
 
-        while (index < raw.length() && Character.isDigit(raw.charAt(index)))
+        while (index < raw.length() &&
+                (Character.isDigit(raw.charAt(index)) || raw.charAt(index) == '.')) {
             index++;
+        }
 
         String unitPart = raw.substring(index).toUpperCase();
-        double number = Double.parseDouble(raw.substring(0, index));   // parse the number part
+        String numberPart = raw.substring(0, index);
+
+        double number = Double.parseDouble(numberPart);
+
+        long value;
 
         switch (unitPart) {
             case "KB":
@@ -33,19 +53,11 @@ public class ByteSize implements Token {
             case "MB":
                 value = (long) (number * 1024 * 1024);
                 break;
-        };
+            default:
+                throw new IllegalArgumentException("Unknown byte size unit: " + unitPart);
+        }
 
         return value;
-    }
-
-    public ByteSize(String raw) {
-        this.value = parseBytes(raw);
-        this.raw = raw;
-    }
-
-    @Override
-    public Object value() {
-        return raw;
     }
 
     /**
@@ -53,6 +65,11 @@ public class ByteSize implements Token {
      */
     public long getBytes() {
         return value;
+    }
+
+    @Override
+    public Object value() {
+        return raw;
     }
 
     @Override
@@ -65,6 +82,6 @@ public class ByteSize implements Token {
         JsonObject object = new JsonObject();
         object.addProperty("type", TokenType.BYTE_SIZE.name());
         object.addProperty("value", raw);
-        return null;
+        return object;
     }
 }
