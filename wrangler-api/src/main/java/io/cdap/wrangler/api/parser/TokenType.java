@@ -23,7 +23,6 @@ import java.io.Serializable;
 /**
  * The TokenType class provides the enumerated types for different types of
  * tokens that are supported by the grammar.
- *
  * Each of the enumerated types specified in this class also has associated
  * object representing it. e.g. {@code DIRECTIVE_NAME} is represented by the
  * object {@code DirectiveName}.
@@ -75,6 +74,18 @@ public enum TokenType implements Serializable {
    * This type is associated with the token that either represents string 'true' or 'false'.
    */
   BOOLEAN,
+
+    /**
+     * Represents the enumerated type for the object of type {@code Byte} type.
+     * This type is associated with the token that represents the size like KB, MB.
+     */
+  BYTE_SIZE,
+
+    /**
+     * Represents the enumerated type for the object of type {@code Time} type.
+     * This type is associated with the token that represents time in milliseconds, seconds.
+     */
+  TIME_DURATION,
 
   /**
    * Represents the enumerated type for the object of type {@code BoolList} type.

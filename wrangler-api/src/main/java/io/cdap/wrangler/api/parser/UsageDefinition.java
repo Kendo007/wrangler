@@ -24,11 +24,9 @@ import java.util.List;
 
 /**
  * This class {@link UsageDefinition} provides a way for users to registers the argument for UDDs.
- *
  * {@link UsageDefinition} is a collection of {@link TokenDefinition} and the name of the directive
  * itself. Each token specification has an associated ordinal that can be used to position the argument
  * within the directive.
- *
  * Following is a example of how this class can be used.
  * <code>
  *   UsageDefinition.Builder builder = UsageDefinition.builder();
@@ -37,7 +35,6 @@ import java.util.List;
  *   builder.add("expression", TypeToken.EXPRESSION);
  *   UsageDefinition definition = builder.build();
  * </code>
- *
  * NOTE: No constraints checks are included in this implementation.
  *
  * @see TokenDefinition
@@ -117,6 +114,10 @@ public final class UsageDefinition implements Serializable {
           sb.append("'").append(token.name()).append("'");
         } else if (token.type().equals(TokenType.IDENTIFIER) || token.type().equals(TokenType.NUMERIC)) {
           sb.append(token.name());
+        } else if (token.type().equals(TokenType.BYTE_SIZE)) {
+          sb.append(token.name()).append(" KB|MB");
+        } else if (token.type().equals(TokenType.TIME_DURATION)) {
+          sb.append(token.name()).append(" ms|s/sec/seconds");
         } else if (token.type().equals(TokenType.BOOLEAN_LIST) || token.type().equals(TokenType.NUMERIC_LIST)
           || token.type().equals(TokenType.TEXT_LIST)) {
           sb.append(token.name()).append("[,").append(token.name()).append(" ...]*");
