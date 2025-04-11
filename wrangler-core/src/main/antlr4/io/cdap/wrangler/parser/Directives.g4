@@ -55,6 +55,8 @@ directive
     | identifier
     | macro
     | text
+    | byteSizeArg
+    | timeDurationArg
     | number
     | bool
     | column
@@ -195,6 +197,15 @@ identifierList
  : Identifier (',' Identifier)*
  ;
 
+byteSizeArg
+ : BYTE_SIZE
+ ;
+
+timeDurationArg
+ : TIME_DURATION
+ ;
+
+
 
 /*
  * Following are the Lexer Rules used for tokenizing the recipe.
@@ -254,7 +265,7 @@ Bool
  ;
 
 Number
- : Int ('.' Digit*)?
+ : NumberLiteral
  ;
 
 Identifier
@@ -279,6 +290,14 @@ EscapeSequence
    |   UnicodeEscape
    |   OctalEscape
    ;
+
+BYTE_SIZE
+  : NumberLiteral ByteUnit
+  ;
+
+TIME_DURATION
+  : NumberLiteral TimeUnit
+  ;
 
 fragment
 OctalEscape
@@ -311,3 +330,16 @@ fragment Int
 fragment Digit
  : [0-9]
  ;
+
+fragment NumberLiteral
+  : Int ('.' Digit*)?
+  ;
+
+fragment ByteUnit
+    :   [kK][bB]
+    |   [mM][bB]
+    ;
+
+fragment TimeUnit
+    : 'ms' | 's'| 'sec' | 'seconds'
+    ;
