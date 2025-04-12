@@ -29,7 +29,8 @@ import org.antlr.v4.runtime.tree.ParseTree;
  */
 public class GuiParseTree {
     public static void main(String[] args) throws Exception {
-        String input = "aggregate-stats :col1 :col2 90kb 5sec;";
+        String input = "\"aggregate-stats :data_transfer_size response_time total_size_mb\n" +
+                "total_time_sec\"";
 
         // Step 1: Create CharStream from input
         CharStream cs = CharStreams.fromString(input);

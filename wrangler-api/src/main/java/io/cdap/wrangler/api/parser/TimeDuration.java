@@ -61,9 +61,9 @@ public class TimeDuration implements Token {
             case "s":
             case "sec":
             case "seconds":
-                return (long) (number * 1000 * 1000);
+                return (long) (number * 1000_000_000L);
             case "ms":
-                return (long) (number * 1000);
+                return (long) (number * 1000_000L);
             default:
                 throw new IllegalArgumentException("Unknown time unit: " + unitPart);
         }
