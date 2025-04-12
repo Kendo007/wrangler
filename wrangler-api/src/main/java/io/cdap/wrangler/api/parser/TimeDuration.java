@@ -26,7 +26,7 @@ import io.cdap.wrangler.api.annotations.PublicEvolving;
 @PublicEvolving
 public class TimeDuration implements Token {
     private final String raw;
-    private double value;
+    private final long value;
 
     public TimeDuration(String raw) {
         if (raw.startsWith("-")) {
@@ -35,7 +35,7 @@ public class TimeDuration implements Token {
 
         this.value = parseTime(raw);
 
-        if (value <= 0) {
+        if (value <= 0 || raw.isEmpty()) {
             throw new IllegalArgumentException("Invalid time: " + raw);
         }
 
@@ -47,12 +47,13 @@ public class TimeDuration implements Token {
      *
      * @param raw the string to parse
      */
-    private double parseTime(String raw) {
+    private long parseTime(String raw) {
         int index = 0;
         while (index < raw.length() && (Character.isDigit(raw.charAt(index)) || raw.charAt(index) == '.')) {
             index++;
         }
 
+        raw = raw.trim();
         String unitPart = raw.substring(index).toLowerCase();
         double number = Double.parseDouble(raw.substring(0, index));
 
@@ -60,9 +61,9 @@ public class TimeDuration implements Token {
             case "s":
             case "sec":
             case "seconds":
-                return number * 1000;
+                return (long) (number * 1000 * 1000);
             case "ms":
-                return number;
+                return (long) (number * 1000);
             default:
                 throw new IllegalArgumentException("Unknown time unit: " + unitPart);
         }
@@ -71,7 +72,7 @@ public class TimeDuration implements Token {
     /**
      * Returns the value of this {@code TimeDuration} object as a double in milliseconds.
      */
-    public double getMilliSeconds() {
+    public long getNanoSeconds() {
         return value;
     }
 

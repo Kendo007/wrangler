@@ -35,7 +35,7 @@ public class ByteSize implements Token {
 
         this.value = parseBytes(raw);
 
-        if (value <= 0L) {
+        if (value <= 0L || raw.isEmpty()) {
             throw new IllegalArgumentException("Invalid Size: " + raw);
         }
 
@@ -55,6 +55,7 @@ public class ByteSize implements Token {
             index++;
         }
 
+        raw = raw.trim();
         String unitPart = raw.substring(index).toUpperCase();
         String numberPart = raw.substring(0, index);
 
