@@ -26,28 +26,27 @@ import io.cdap.wrangler.api.annotations.PublicEvolving;
 @PublicEvolving
 public class ByteSize implements Token {
     private final String raw;
-    private long value;
+    private final long value;
 
     public ByteSize(String raw) {
+        this.raw = raw.trim();
+
         if (raw.startsWith("-")) {
             throw new IllegalArgumentException("Negative Size: " + raw);
         }
 
-        this.value = parseBytes(raw);
+        this.value = parseBytes(this.raw);
 
         if (value <= 0L || raw.isEmpty()) {
             throw new IllegalArgumentException("Invalid Size: " + raw);
         }
-
-        this.raw = raw;
     }
 
     /**
      * Parses the string and returns the value in bytes.
-     *
      * @param raw the string to parse
      */
-    private long parseBytes(String raw) {
+    private static long parseBytes(String raw) {
         int index = 0;
 
         while (index < raw.length() &&
@@ -55,20 +54,27 @@ public class ByteSize implements Token {
             index++;
         }
 
-        raw = raw.trim();
         String unitPart = raw.substring(index).toUpperCase();
         String numberPart = raw.substring(0, index);
 
         double number = Double.parseDouble(numberPart);
-
         long value;
 
         switch (unitPart) {
+            case "B":
+                value = (long) number;
+                break;
             case "KB":
                 value = (long) (number * 1024);
                 break;
             case "MB":
                 value = (long) (number * 1024 * 1024);
+                break;
+            case "GB":
+                value = (long) (number * 1024 * 1024 * 1024);
+                break;
+            case "TB":
+                value = (long) (number * 1024 * 1024 * 1024 * 1024);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown byte size unit: " + unitPart);
@@ -78,10 +84,51 @@ public class ByteSize implements Token {
     }
 
     /**
+      * Converts the byte size value to the specified unit and returns it.
+      * @param unit the unit to convert the value to (e.g., "B", "KB", "MB", "GB", "TB")
+     */
+    public static double getValueIn(long bytes, String unit) {
+        switch (unit.trim().toUpperCase()) {
+            case "B":
+                return (double) bytes;
+            case "KB":
+                return getKiloBytes(bytes);
+            case "MB":
+                return getMegaBytes(bytes);
+            case "GB":
+                return getGigaBytes(bytes);
+            case "TB":
+                return getTeraBytes(bytes);
+            default:
+                return getKiloBytes(bytes);
+        }
+    }
+
+    /**
      * Returns the value of this {@code ByteSize} object as a long in bytes
      */
     public long getBytes() {
         return value;
+    }
+
+    /** Return value in KB */
+    public static double getKiloBytes(long bytes) {
+        return (double) bytes / 1024;
+    }
+
+    /** Return value in MB */
+    public static double getMegaBytes(long bytes) {
+        return (double) bytes / 1024 / 1024;
+    }
+
+    /** Return value in GB */
+    public static double getGigaBytes(long bytes) {
+        return (double) bytes / 1024 / 1024 / 1024;
+    }
+
+    /** Return value in TB */
+    public static double getTeraBytes(long bytes) {
+        return (double) bytes / 1024 / 1024 / 1024 / 1024;
     }
 
     @Override
@@ -98,7 +145,7 @@ public class ByteSize implements Token {
     public JsonElement toJson() {
         JsonObject object = new JsonObject();
         object.addProperty("type", TokenType.BYTE_SIZE.name());
-        object.addProperty("value", raw);
+        object.addProperty("value", value);
         return object;
     }
 }

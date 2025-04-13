@@ -19,12 +19,12 @@ package io.cdap.directives.aggregates;
 import io.cdap.cdap.api.annotation.Description;
 import io.cdap.cdap.api.annotation.Name;
 import io.cdap.cdap.api.annotation.Plugin;
-import io.cdap.cdap.etl.api.Aggregator;
 import io.cdap.wrangler.api.Arguments;
 import io.cdap.wrangler.api.Directive;
 import io.cdap.wrangler.api.DirectiveExecutionException;
 import io.cdap.wrangler.api.DirectiveParseException;
 import io.cdap.wrangler.api.ExecutorContext;
+import io.cdap.wrangler.api.Optional;
 import io.cdap.wrangler.api.Row;
 import io.cdap.wrangler.api.TransientStore;
 import io.cdap.wrangler.api.TransientVariableScope;
@@ -32,6 +32,7 @@ import io.cdap.wrangler.api.annotations.Categories;
 import io.cdap.wrangler.api.parser.Bool;
 import io.cdap.wrangler.api.parser.ByteSize;
 import io.cdap.wrangler.api.parser.ColumnName;
+import io.cdap.wrangler.api.parser.Identifier;
 import io.cdap.wrangler.api.parser.Text;
 import io.cdap.wrangler.api.parser.TimeDuration;
 import io.cdap.wrangler.api.parser.TokenType;
@@ -63,11 +64,11 @@ public class AggregateStats implements Directive {
         UsageDefinition.Builder builder = UsageDefinition.builder(NAME);
         builder.define("byteSizeColumn", TokenType.COLUMN_NAME);
         builder.define("timeColumn", TokenType.COLUMN_NAME);
-        builder.define("totalSizeColumn", TokenType.COLUMN_NAME);
-        builder.define("totalTimeColumn", TokenType.COLUMN_NAME);
-        builder.define("sizeUnit", TokenType.TEXT);
-        builder.define("timeUnit", TokenType.TEXT);
-        builder.define("isAverage", TokenType.BOOLEAN);
+        builder.define("totalSizeColumn", TokenType.IDENTIFIER);
+        builder.define("totalTimeColumn", TokenType.IDENTIFIER);
+        builder.define("sizeUnit", TokenType.TEXT, Optional.TRUE);
+        builder.define("timeUnit", TokenType.TEXT, Optional.TRUE);
+        builder.define("isAverage", TokenType.BOOLEAN, Optional.TRUE);
         return builder.build();
     }
 
@@ -75,11 +76,12 @@ public class AggregateStats implements Directive {
     public void initialize(Arguments args) throws DirectiveParseException {
         this.byteSizeColumn = ((ColumnName) args.value("byteSizeColumn")).value();
         this.timeColumn = ((ColumnName) args.value("timeColumn")).value();
-        this.totalSizeColumn = ((ColumnName) args.value("totalSizeColumn")).value();
-        this.totalTimeColumn = ((ColumnName) args.value("totalTimeColumn")).value();
-        this.sizeUnit = ((Text) args.value("sizeUnit")).value();
-        this.timeUnit = ((Text) args.value("timeUnit")).value();
-        this.isAverage = ((Bool) args.value("isAverage")).value();
+        this.totalSizeColumn = ((Identifier) args.value("totalSizeColumn")).value();
+        this.totalTimeColumn = ((Identifier) args.value("totalTimeColumn")).value();
+
+        this.sizeUnit = args.contains("sizeUnit") ? ((Text) args.value("sizeUnit")).value() : "MB";
+        this.timeUnit = args.contains("timeUnit") ? ((Text) args.value("timeUnit")).value() : "s";
+        this.isAverage = args.contains("isAverage") ? ((Bool) args.value("isAverage")).value() : false;
     }
 
     @Override
@@ -130,12 +132,12 @@ public class AggregateStats implements Directive {
 
         // Retrieve accumulated totals from the store
         Object totalSizeObject = store.get(totalSizeColumn);
-        double totalSize = (totalSizeObject instanceof Number) ? ((Number) totalSizeObject).doubleValue()
-                : Double.parseDouble(totalSizeObject.toString());
+        long totalSizeBytes = (totalSizeObject instanceof Number) ? ((Number) totalSizeObject).longValue()
+                : Long.parseLong(totalSizeObject.toString());
 
         Object totalTimeObject = store.get(totalTimeColumn);
-        double totalTime = (totalTimeObject instanceof Number) ? ((Number) totalTimeObject).doubleValue()
-                : Double.parseDouble(totalTimeObject.toString());
+        long totalTimeNano = (totalTimeObject instanceof Number) ? ((Number) totalTimeObject).longValue()
+                : Long.parseLong(totalTimeObject.toString());
 
         Object rowCountObject = store.get("rowCount");
         long rowCount = (rowCountObject instanceof Number) ? ((Number) rowCountObject).longValue()
@@ -143,26 +145,17 @@ public class AggregateStats implements Directive {
 
         // If averaging is required, divide by the number of rows
         if (isAverage) {
-            totalSize /= rowCount;  // Since totalSize and totalTime are doubles, this division keeps decimals
-            totalTime /= rowCount;  // Same for totalTime
+            totalSizeBytes /= rowCount;
+            totalTimeNano /= rowCount;  // Same for totalTime
         }
 
         // Handle unit conversion if necessary
-        if ("MB".equalsIgnoreCase(sizeUnit)) {
-            totalSize = totalSize / (1024 * 1024); // Convert bytes to MB
-        } else if ("KB".equalsIgnoreCase(sizeUnit)) {
-            totalSize = totalSize / 1024; // Convert bytes to KB
-        }
-
-        if ("seconds".equalsIgnoreCase(timeUnit)) {
-            totalTime = totalTime / 1_000_000_000; // Convert nanoseconds to seconds
-        } else if ("ms".equalsIgnoreCase(timeUnit)) {
-            totalTime = totalTime / 1_000_000; // Convert nanoseconds to milliseconds
-        }
+        double totalSize = ByteSize.getValueIn(totalSizeBytes, sizeUnit);
+        double totalTime = TimeDuration.getValueIn(totalTimeNano, timeUnit);
 
         // Add units to the results
-        String totalSizeWithUnit = String.format("%.3f", totalSize) + " " + sizeUnit;  // Append unit to byte size
-        String totalTimeWithUnit = String.format("%.3f", totalTime) + " " + timeUnit;  // Append unit to time duration
+        String totalSizeWithUnit = String.format("%.3f", totalSize) + " " + sizeUnit.toUpperCase();
+        String totalTimeWithUnit = String.format("%.3f", totalTime) + " " + timeUnit.toLowerCase();
 
         // Create a new row for the aggregated results
         Row aggregatedRow = new Row();

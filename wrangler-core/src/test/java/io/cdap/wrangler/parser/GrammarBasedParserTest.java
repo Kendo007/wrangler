@@ -37,14 +37,14 @@ public class GrammarBasedParserTest {
       "#pragma version 2.0;",
       "rename :col1 :col2",
       "parse-as-csv :body ',' true;",
-      "#pragma load-directives text-reverse, text-exchange;",
+      "#pragma load-directives text-reverse, text-exchange;", "aggregate-stats :a :b x y",
       "${macro} ${macro_2}",
       "${macro_${test}}"
     };
 
     RecipeParser parser = TestingRig.parse(recipe);
     List<Directive> directives = parser.parse();
-    Assert.assertEquals(2, directives.size());
+    Assert.assertEquals(3, directives.size());
   }
 
   @Test

@@ -130,7 +130,7 @@ propertyList
  ;
 
 property
- : Identifier '=' ( text | number | bool )
+ : Identifier '=' ( text | number | bool | timeDurationArg | byteSizeArg )
  ;
 
 numberRanges
@@ -292,11 +292,11 @@ EscapeSequence
    ;
 
 BYTE_SIZE
-  : NumberLiteral ByteUnit
+  : NumberLiteral Space* ByteUnit
   ;
 
 TIME_DURATION
-  : NumberLiteral TimeUnit
+  : NumberLiteral Space* TimeUnit
   ;
 
 fragment
@@ -336,10 +336,13 @@ fragment NumberLiteral
   ;
 
 fragment ByteUnit
-    :   [kK][bB]
+    :   [b][B]
+    |   [kK][bB]
     |   [mM][bB]
+    |   [gG][bB]
+    |   [tT][bB]
     ;
 
 fragment TimeUnit
-    : 'ms' | 's'| 'sec' | 'seconds'
+    : 'ms' | 's'| 'sec' | 'min' | 'seconds'
     ;

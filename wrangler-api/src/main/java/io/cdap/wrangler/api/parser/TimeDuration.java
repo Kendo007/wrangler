@@ -29,17 +29,17 @@ public class TimeDuration implements Token {
     private final long value;
 
     public TimeDuration(String raw) {
+        this.raw = raw.trim();
+
         if (raw.startsWith("-")) {
             throw new IllegalArgumentException("Negative time duration: " + raw);
         }
 
-        this.value = parseTime(raw);
+        this.value = parseTime(this.raw);
 
         if (value <= 0 || raw.isEmpty()) {
             throw new IllegalArgumentException("Invalid time: " + raw);
         }
-
-        this.raw = raw;
     }
 
     /**
@@ -47,17 +47,19 @@ public class TimeDuration implements Token {
      *
      * @param raw the string to parse
      */
-    private long parseTime(String raw) {
+    private static long parseTime(String raw) {
         int index = 0;
+
         while (index < raw.length() && (Character.isDigit(raw.charAt(index)) || raw.charAt(index) == '.')) {
             index++;
         }
 
-        raw = raw.trim();
         String unitPart = raw.substring(index).toLowerCase();
         double number = Double.parseDouble(raw.substring(0, index));
 
         switch (unitPart) {
+            case "min":
+                return (long) (number * 60 * 1000_000_000L);
             case "s":
             case "sec":
             case "seconds":
@@ -69,11 +71,38 @@ public class TimeDuration implements Token {
         }
     }
 
+    public static double getValueIn(long ns, String unit) {
+        switch (unit.trim().toLowerCase()) {
+            case "min":
+                return getMinutes(ns);
+            case "s":
+            case "sec":
+            case "seconds":
+                return getSeconds(ns);
+            case "ms":
+                return getMilliSeconds(ns);
+            default:
+                return getSeconds(ns);
+        }
+    }
+
     /**
      * Returns the value of this {@code TimeDuration} object as a double in milliseconds.
      */
     public long getNanoSeconds() {
         return value;
+    }
+
+    public static double getMilliSeconds(long ns) {
+        return (double) ns / 1000_000L;
+    }
+
+    public static double getSeconds(long ns) {
+        return (double) ns / 1000_000_000L;
+    }
+
+    public static double getMinutes(long ns) {
+        return (double) ns / 60000_000_000L;
     }
 
     @Override

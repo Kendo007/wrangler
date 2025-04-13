@@ -215,4 +215,25 @@ public class RecipeCompilerTest {
     Set<String> loadableDirectives = compile.getSymbols().getLoadableDirectives();
     Assert.assertEquals(4, loadableDirectives.size());
   }
+
+  @Test
+  public void testAggregateStatsRequiredArgsOnly() throws Exception {
+    String[] recipe = new String[] {
+            "aggregate-stats :data_size :duration total_size total_time;"
+    };
+
+    CompileStatus compile = TestingRig.compile(recipe);
+    Assert.assertTrue("Aggregate-stats with only required args should compile", compile.isSuccess());
+  }
+
+
+  @Test
+  public void testAggregateOptionalArgs() throws Exception {
+    String[] recipe = new String[] {
+            "aggregate-stats :data_size :duration total_size total_time 'MB' 'seconds' false;"
+    };
+
+    CompileStatus compile = TestingRig.compile(recipe);
+    Assert.assertTrue("Aggregate-stats directive should compile successfully", compile.isSuccess());
+  }
 }
