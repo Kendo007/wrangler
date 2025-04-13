@@ -46,7 +46,7 @@ import java.util.List;
  */
 @Plugin(type = Directive.TYPE)
 @Name(AggregateStats.NAME)
-@Categories(categories = {"aggregate"})
+@Categories(categories = {"aggregate", "byte", "time"})
 @Description("Aggregates byte size and time duration columns, returning total or average values.")
 public class AggregateStats implements Directive {
 
@@ -127,7 +127,12 @@ public class AggregateStats implements Directive {
         return new ArrayList<>();
     }
 
-    List<Row> finalize(ExecutorContext context) {
+    /**
+     * This is the method used to return the final result with the help of the context
+     * @param context the context of the directive
+     * @return the final row containing the result
+     */
+    private List<Row> finalize(ExecutorContext context) {
         TransientStore store = context.getTransientStore();
 
         // Retrieve accumulated totals from the store

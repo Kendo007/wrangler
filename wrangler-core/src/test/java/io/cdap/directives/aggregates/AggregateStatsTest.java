@@ -39,7 +39,7 @@ public class AggregateStatsTest {
 
         // Sample rows
         List<Row> rows = Arrays.asList(
-                new Row("data_transfer_size", "10485760KB").add("response_time", "5000000ms"),
+                new Row("data_transfer_size", "10485760KB").add("response_time", "5000000"),
                 new Row("data_transfer_size", "20971520KB").add("response_time", "6000000ms"),
                 new Row("data_transfer_size", "5242880KB").add("response_time", "4000000ms")
         );
@@ -64,9 +64,9 @@ public class AggregateStatsTest {
 
         // Sample rows
         List<Row> rows = Arrays.asList(
-                new Row("data_transfer_size", "10485760KB").add("response_time", "5000000ms"),
-                new Row("data_transfer_size", "20971520KB").add("response_time", "6000000ms"),
-                new Row("data_transfer_size", "5242880KB").add("response_time", "4000000ms")
+                new Row("data_transfer_size", "10485760B").add("response_time", "5000000"),
+                new Row("data_transfer_size", "20971520B").add("response_time", "6000000"),
+                new Row("data_transfer_size", "5242880").add("response_time", "4000000")
         );
 
         List<Row> rows1 = TestingRig.execute(recipe1, rows);

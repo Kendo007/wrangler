@@ -61,6 +61,7 @@ public class ByteSize implements Token {
         long value;
 
         switch (unitPart) {
+            case "":
             case "B":
                 value = (long) number;
                 break;

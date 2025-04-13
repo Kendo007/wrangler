@@ -64,6 +64,7 @@ public class TimeDuration implements Token {
             case "sec":
             case "seconds":
                 return (long) (number * 1000_000_000L);
+            case "":
             case "ms":
                 return (long) (number * 1000_000L);
             default:
