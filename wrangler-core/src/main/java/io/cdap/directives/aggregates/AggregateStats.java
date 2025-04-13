@@ -90,10 +90,10 @@ public class AggregateStats implements Directive {
 
         // For each row, process the byte size and time duration
         for (Row row : rows) {
-            String byteSizeStr = row.getValue(row.find(byteSizeColumn)).toString();
-            String timeStr = row.getValue(row.find(timeColumn)).toString();
-
             try {
+                String byteSizeStr = row.getValue(row.find(byteSizeColumn)).toString();
+                String timeStr = row.getValue(row.find(timeColumn)).toString();
+
                 // Parse the byte size and time duration
                 ByteSize byteSize = new ByteSize(byteSizeStr);
                 TimeDuration timeDuration = new TimeDuration(timeStr);

@@ -75,6 +75,9 @@ public class AggregateStatsTest {
         Assert.assertEquals(1, rows1.size());
         Assert.assertEquals(1, rows2.size());
 
+        Assert.assertEquals("35.000 MB", rows1.get(0).getValue("total_size_mb"));
+        Assert.assertEquals("15000.000 s", rows1.get(0).getValue("total_time_sec"));
+
         // Check the output values
         Assert.assertEquals(rows2.get(0).getValue("my_size"), rows1.get(0).getValue("total_size_mb"));
         Assert.assertEquals(rows2.get(0).getValue("my_time"), rows1.get(0).getValue("total_time_sec"));
