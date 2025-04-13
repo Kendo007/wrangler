@@ -53,6 +53,59 @@ public class AggregateStatsTest {
     }
 
     @Test
+    public void testBasicAggregationMix() throws Exception {
+        String[] recipe = new String[] {
+                "aggregate-stats :data_transfer_size :response_time total_size_mb total_time_sec 'TB' 'min' false;"
+        };
+
+        // Sample rows
+        List<Row> rows = Arrays.asList(
+                new Row("data_transfer_size", "1 TB").add("response_time", " 500    min "),
+                new Row("data_transfer_size", "   2048 GB ").add("response_time", " 6000s "),
+                new Row("data_transfer_size", "   2097152 MB").add("response_time", "4000000    ms")
+        );
+
+        rows = TestingRig.execute(recipe, rows);
+        Assert.assertEquals(1, rows.size());
+
+        // Check the output values
+        Assert.assertEquals("5.000 TB", rows.get(0).getValue("total_size_mb"));
+        Assert.assertEquals("666.667 min", rows.get(0).getValue("total_time_sec"));
+    }
+
+    @Test(expected = RecipeException.class)
+    public void testBasicFailTime() throws Exception {
+        String[] recipe = new String[] {
+                "aggregate-stats :data_transfer_size :response_time total_size_mb total_time_sec;"
+        };
+
+        // Sample rows
+        List<Row> rows = Arrays.asList(
+                new Row("data_transfer_size", "10485760KB").add("response_time", "5000000"),
+                new Row("data_transfer_size", "20971520KB").add("response_time", "6000000ms"),
+                new Row("data_transfer_size", "5242880KB").add("response_time", "4000000mi")
+        );
+
+        rows = TestingRig.execute(recipe, rows); // Expecting a Failure
+    }
+
+    @Test(expected = RecipeException.class)
+    public void testBasicFailSize() throws Exception {
+        String[] recipe = new String[] {
+                "aggregate-stats :data_transfer_size :response_time total_size_mb total_time_sec;"
+        };
+
+        // Sample rows
+        List<Row> rows = Arrays.asList(
+                new Row("data_transfer_size", "10485760XB").add("response_time", "5000000"),
+                new Row("data_transfer_size", "20971520KB").add("response_time", "6000000ms"),
+                new Row("data_transfer_size", "5242880KB").add("response_time", "4000000ms")
+        );
+
+        rows = TestingRig.execute(recipe, rows); // Expecting a Failure
+    }
+
+    @Test
     public void testDiffColumnNames() throws Exception {
         String[] recipe1 = new String[] {
                 "aggregate-stats :data_transfer_size :response_time total_size_mb total_time_sec;"

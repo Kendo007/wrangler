@@ -54,7 +54,7 @@ public class ByteSize implements Token {
             index++;
         }
 
-        String unitPart = raw.substring(index).toUpperCase();
+        String unitPart = raw.substring(index).toUpperCase().trim();
         String numberPart = raw.substring(0, index);
 
         double number = Double.parseDouble(numberPart);

@@ -54,7 +54,7 @@ public class TimeDuration implements Token {
             index++;
         }
 
-        String unitPart = raw.substring(index).toLowerCase();
+        String unitPart = raw.substring(index).toLowerCase().trim();
         double number = Double.parseDouble(raw.substring(0, index));
 
         switch (unitPart) {
