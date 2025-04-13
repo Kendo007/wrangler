@@ -25,17 +25,16 @@ import io.cdap.wrangler.api.annotations.PublicEvolving;
  */
 @PublicEvolving
 public class ByteSize implements Token {
-    private final String raw;
     private final long value;
 
     public ByteSize(String raw) {
-        this.raw = raw.trim();
+        raw = raw.trim();
 
         if (raw.startsWith("-")) {
             throw new IllegalArgumentException("Negative Size: " + raw);
         }
 
-        this.value = parseBytes(this.raw);
+        this.value = parseBytes(raw);
 
         if (value <= 0L || raw.isEmpty()) {
             throw new IllegalArgumentException("Invalid Size: " + raw);
@@ -134,7 +133,7 @@ public class ByteSize implements Token {
 
     @Override
     public Object value() {
-        return raw;
+        return getBytes() + " B";
     }
 
     @Override

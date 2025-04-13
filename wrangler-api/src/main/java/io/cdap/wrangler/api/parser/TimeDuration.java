@@ -25,17 +25,16 @@ import io.cdap.wrangler.api.annotations.PublicEvolving;
 */
 @PublicEvolving
 public class TimeDuration implements Token {
-    private final String raw;
     private final long value;
 
     public TimeDuration(String raw) {
-        this.raw = raw.trim();
+        raw = raw.trim();
 
         if (raw.startsWith("-")) {
             throw new IllegalArgumentException("Negative time duration: " + raw);
         }
 
-        this.value = parseTime(this.raw);
+        this.value = parseTime(raw);
 
         if (value <= 0 || raw.isEmpty()) {
             throw new IllegalArgumentException("Invalid time: " + raw);
@@ -108,7 +107,7 @@ public class TimeDuration implements Token {
 
     @Override
     public Object value() {
-        return raw;
+        return getNanoSeconds() + " ns";
     }
 
     @Override
@@ -120,7 +119,7 @@ public class TimeDuration implements Token {
     public JsonElement toJson() {
         JsonObject object = new JsonObject();
         object.addProperty("type", TokenType.TIME_DURATION.name());
-        object.addProperty("value", raw);
+        object.addProperty("value", value);
         return object;
     }
 }
