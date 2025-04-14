@@ -72,7 +72,11 @@ public class TimeDurationTest {
         assertEquals(1.0, TimeDuration.getValueIn(60_000_000_000L, "min"), 0.001);
         assertEquals(1.0, TimeDuration.getValueIn(1_000_000_000L, "sec"), 0.001);
         assertEquals(1.0, TimeDuration.getValueIn(1_000_000L, "ms"), 0.001);
-        assertEquals(1.0, TimeDuration.getValueIn(1_000_000_000L, "unknown"), 0.001); // fallback to seconds
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetValueInFail() {
+        assertEquals(1.0, TimeDuration.getValueIn(1_000_000L, "invalid"), 0.001);
     }
 
     @Test

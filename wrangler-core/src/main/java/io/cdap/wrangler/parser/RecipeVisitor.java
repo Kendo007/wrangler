@@ -177,6 +177,30 @@ public final class RecipeVisitor extends DirectivesBaseVisitor<RecipeSymbol.Buil
   }
 
   /**
+   * A value can be a byte size token (e.g., "5MB", "2GB"). This visitor method
+   * extracts the byte size value and creates a token type {@code ByteSize}.
+   */
+  @Override
+  public RecipeSymbol.Builder visitValue(DirectivesParser.ValueContext ctx) {
+    if (ctx.String() != null) {
+      String value = ctx.String().getText();
+      builder.addToken(new Text(value.substring(1, value.length() - 1)));
+    } else if (ctx.Number() != null) {
+      builder.addToken(new Numeric(new LazyNumber(ctx.Number().getText())));
+    } else if (ctx.Column() != null) {
+      builder.addToken(new ColumnName(ctx.Column().getText().substring(1)));
+    } else if (ctx.Bool() != null) {
+      builder.addToken(new Bool(Boolean.valueOf(ctx.Bool().getText())));
+    } else if (ctx.BYTE_SIZE() != null) {
+      builder.addToken(new ByteSize(ctx.BYTE_SIZE().getText()));
+    } else if (ctx.TIME_DURATION() != null) {
+      builder.addToken(new TimeDuration(ctx.TIME_DURATION().getText()));
+    }
+
+    return builder;
+  }
+
+  /**
    * This visitor method extracts the custom directive name specified. The custom
    * directives are specified with a bang (!) at the start.
    */

@@ -82,7 +82,7 @@ public class TimeDuration implements Token {
             case "ms":
                 return getMilliSeconds(ns);
             default:
-                return getSeconds(ns);
+                throw new IllegalArgumentException("Unknown time unit: " + unit);
         }
     }
 

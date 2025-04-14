@@ -100,7 +100,7 @@ public class ByteSize implements Token {
             case "TB":
                 return getTeraBytes(bytes);
             default:
-                return getKiloBytes(bytes);
+                throw new IllegalArgumentException("Unknown byte size unit: " + unit);
         }
     }
 

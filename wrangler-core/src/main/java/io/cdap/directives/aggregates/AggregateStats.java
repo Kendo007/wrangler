@@ -82,6 +82,14 @@ public class AggregateStats implements Directive {
         this.sizeUnit = args.contains("sizeUnit") ? ((Text) args.value("sizeUnit")).value() : "MB";
         this.timeUnit = args.contains("timeUnit") ? ((Text) args.value("timeUnit")).value() : "s";
         this.isAverage = args.contains("isAverage") ? ((Bool) args.value("isAverage")).value() : false;
+
+        // Cheap way to check for invalid unit arguments
+        try {
+            ByteSize.getValueIn(1, this.sizeUnit);
+            TimeDuration.getValueIn(1, this.timeUnit);
+        } catch (IllegalArgumentException e) {
+            throw new DirectiveParseException(e.getMessage(), e);
+        }
     }
 
     @Override

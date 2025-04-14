@@ -64,7 +64,11 @@ public class ByteSizeTest {
         assertEquals(1.0, ByteSize.getValueIn(1024 * 1024 * 1024L, "GB"), 0.001);
         assertEquals(1.0, ByteSize.getValueIn(1024L * 1024 * 1024 * 1024, "TB"), 0.001);
         assertEquals(1024.0, ByteSize.getValueIn(1024, "B"), 0.001); // Raw bytes
-        assertEquals(1.0, ByteSize.getValueIn(1024, "invalid"), 0.001); // fallback to KB
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetValueInFail() {
+        assertEquals(1.0, TimeDuration.getValueIn(1_000_000L, "invalid"), 0.001);
     }
 
     @Test

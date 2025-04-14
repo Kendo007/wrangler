@@ -105,6 +105,38 @@ public class AggregateStatsTest {
         rows = TestingRig.execute(recipe, rows); // Expecting a Failure
     }
 
+    @Test(expected = RecipeException.class)
+    public void testInvalidTimeUnitFail() throws Exception {
+        String[] recipe = new String[] {
+                "aggregate-stats :data_transfer_size :response_time total_size_mb total_time_sec 'TB' 'invalid' false;"
+        };
+
+        // Sample rows
+        List<Row> rows = Arrays.asList(
+                new Row("data_transfer_size", "10485760KB").add("response_time", "5000000"),
+                new Row("data_transfer_size", "20971520KB").add("response_time", "6000000ms"),
+                new Row("data_transfer_size", "5242880KB").add("response_time", "4000000ms")
+        );
+
+        rows = TestingRig.execute(recipe, rows); // Expecting a Failure
+    }
+
+    @Test(expected = RecipeException.class)
+    public void testInvalidByteUnitFail() throws Exception {
+        String[] recipe = new String[] {
+                "aggregate-stats :data_transfer_size :response_time total_size_mb total_time_sec 'UB' 'min' false;"
+        };
+
+        // Sample rows
+        List<Row> rows = Arrays.asList(
+                new Row("data_transfer_size", "10485760KB").add("response_time", "5000000"),
+                new Row("data_transfer_size", "20971520KB").add("response_time", "6000000ms"),
+                new Row("data_transfer_size", "5242880KB").add("response_time", "4000000ms")
+        );
+
+        rows = TestingRig.execute(recipe, rows); // Expecting a Failure
+    }
+
     @Test
     public void testDiffColumnNames() throws Exception {
         String[] recipe1 = new String[] {
